@@ -1,0 +1,6 @@
+[submodule "dependencies/exception"]
+	path = dependencies/exception
+	url = git@github.com:aphenriques/exception.git
+[submodule "dependencies/LUrlParser/LUrlParser"]
+	path = dependencies/LUrlParser/LUrlParser
+	url = https://github.com/corporateshark/LUrlParser.git
