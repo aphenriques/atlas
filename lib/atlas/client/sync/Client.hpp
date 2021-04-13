@@ -52,17 +52,7 @@ namespace atlas::client::sync {
             const boost::beast::http::request<Body, Fields> &request
         );
 
-        template<typename FollowerConnection = Connection, typename Body, typename Fields>
-        boost::beast::http::response<boost::beast::http::dynamic_body> requestFollowingTemporaryLocation(
-            boost::beast::http::request<Body, Fields> request,
-            int retries
-        );
-
         boost::system::error_code shutdown();
-
-    protected:
-        Connection & getConnection();
-        boost::asio::ip::tcp::resolver & getResolver();
 
     private:
         boost::asio::ip::tcp::resolver resolver_;
@@ -106,16 +96,6 @@ namespace atlas::client::sync {
     template<typename Connection>
     boost::system::error_code Client<Connection>::shutdown() {
         return connection_.shutdown();
-    }
-
-    template<typename Connection>
-    Connection & Client<Connection>::getConnection() {
-        return connection_;
-    }
-
-    template<typename Connection>
-    boost::asio::ip::tcp::resolver & Client<Connection>::getResolver() {
-        return resolver_;
     }
 }
 
