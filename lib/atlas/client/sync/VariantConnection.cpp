@@ -1,5 +1,5 @@
 //
-//  client/sync/Connection.hpp
+//  client/sync/VariantConnection.cpp
 //  atlas
 //
 // MIT License
@@ -24,30 +24,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef atlas_client_sync_Connection_hpp
-#define atlas_client_sync_Connection_hpp
-
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/beast/core/tcp_stream.hpp>
-#include "../../Url.hpp"
-#include "Requester.hpp"
+#include "VariantConnection.hpp"
 
 namespace atlas::client::sync {
-    class Connection : public Requester<Connection> {
-    public:
-        Connection(
-            boost::asio::io_context &ioContext,
-            boost::asio::ip::tcp::resolver &resolver,
-            const Url &url
+    VariantConnection::VariantConnection(
+        boost::asio::io_context &ioContext,
+        boost::asio::ip::tcp::resolver &resolver,
+        const Url &url,
+        boost::asio::ssl::context &sslContext
+    ) {
+        if (url.getScheme() == "https") {
+            variantConnection_.emplace<SecureConnection>(ioContext, resolver, url, sslContext);
+        } else if (url.getScheme() == "http") {
+            variantConnection_.emplace<Connection>(ioContext, resolver, url);
+        } else {
+            throw Exception(__FILE__, __LINE__, __func__, "unexpected url scheme: ", url.getScheme());
+        }
+    }
+
+    boost::system::error_code VariantConnection::shutdown() {
+        return std::visit(
+            [](auto &&connection) -> boost::system::error_code {
+                if constexpr (std::is_same_v<std::decay_t<decltype(connection)>, std::monostate> == false) {
+                    return connection.shutdown();
+                } else {
+                    throw Exception(__FILE__, __LINE__, __func__, "undefined variantConnection_");
+                }
+            },
+            variantConnection_
         );
-
-        boost::beast::tcp_stream & getStream();
-        boost::system::error_code shutdown();
-
-    private:
-        boost::beast::tcp_stream stream_;
-    };
+    }
 }
-
-#endif

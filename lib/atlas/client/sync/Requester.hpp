@@ -1,5 +1,5 @@
 //
-//  client/sync/Client.hpp
+//  client/sync/Requester.hpp
 //  atlas
 //
 // MIT License
@@ -24,66 +24,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef atlas_client_sync_Client_hpp
-#define atlas_client_sync_Client_hpp
+#ifndef atlas_client_sync_Requester_hpp
+#define atlas_client_sync_Requester_hpp
 
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/http.hpp>
-#include "../../Url.hpp"
+#include "Exception.hpp"
 
 namespace atlas::client::sync {
-    template<typename Connection>
-    class Client {
+    template<typename StreamContainer>
+    class Requester {
     public:
-        Client(const Client &) = delete;
-        Client & operator=(const Client &) = delete;
-
-        template<typename ...SslContextOrNothing>
-        Client(
-            boost::asio::io_context &ioContext,
-            const Url &url,
-            SslContextOrNothing &...sslContextOrNothing
-        );
-
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
-            const boost::beast::http::request<Body, Fields> &request
+            boost::beast::flat_buffer &buffer,
+            const boost::beast::http::request<Body, Fields> &requestMessage
         );
-
-        boost::system::error_code shutdown();
-
-    private:
-        boost::asio::ip::tcp::resolver resolver_;
-        Connection connection_;
-        boost::beast::flat_buffer buffer_;
     };
 
     //--
 
-    template<typename Connection>
-    template<typename ...SslContextOrNothing>
-    Client<Connection>::Client(
-        boost::asio::io_context &ioContext,
-        const Url &url,
-        SslContextOrNothing &...sslContextOrNothing
-    ) :
-        resolver_(ioContext),
-        connection_(ioContext, resolver_, url, sslContextOrNothing...)
-    {}
-
-    template<typename Connection>
-    template<typename Body, typename Fields>
-    boost::beast::http::response<boost::beast::http::dynamic_body> Client<Connection>::request(
+    template<typename StreamContainer>
+    template< typename Body, typename Fields>
+    boost::beast::http::response<boost::beast::http::dynamic_body> Requester<StreamContainer>::request(
+        boost::beast::flat_buffer &buffer,
         const boost::beast::http::request<Body, Fields> &requestMessage
     ) {
-        return connection_.request(buffer_, requestMessage);
-    }
-
-    template<typename Connection>
-    boost::system::error_code Client<Connection>::shutdown() {
-        return connection_.shutdown();
+        auto &stream = static_cast<StreamContainer *>(this)->getStream();
+        boost::system::error_code errorCode;
+        boost::beast::http::write(stream, requestMessage, errorCode);
+        if (errorCode.value() == 0) {
+            boost::beast::http::response<boost::beast::http::dynamic_body> response;
+            boost::beast::http::read(stream, buffer, response, errorCode);
+            if (errorCode.value() == 0) {
+                return response;
+            } else {
+                throw Exception(__FILE__, __LINE__, __func__, "read error: [[ ", errorCode.message(), " ]]");
+            }
+        } else {
+            throw Exception(__FILE__, __LINE__, __func__, "write error: [[ ", errorCode.message(), " ]]");
+        }
     }
 }
 
 #endif
+

@@ -1,5 +1,5 @@
 //
-//  client/sync/Client.hpp
+//  client/sync/VariantConnection.hpp
 //  atlas
 //
 // MIT License
@@ -24,65 +24,52 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef atlas_client_sync_Client_hpp
-#define atlas_client_sync_Client_hpp
+#ifndef atlas_client_sync_VariantConnection_hpp
+#define atlas_client_sync_VariantConnection_hpp
 
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/beast/core/flat_buffer.hpp>
-#include <boost/beast/http.hpp>
-#include "../../Url.hpp"
+#include <variant>
+#include "Connection.hpp"
+#include "SecureConnection.hpp"
 
 namespace atlas::client::sync {
-    template<typename Connection>
-    class Client {
+    class VariantConnection {
     public:
-        Client(const Client &) = delete;
-        Client & operator=(const Client &) = delete;
-
-        template<typename ...SslContextOrNothing>
-        Client(
+        VariantConnection(
             boost::asio::io_context &ioContext,
+            boost::asio::ip::tcp::resolver &resolver,
             const Url &url,
-            SslContextOrNothing &...sslContextOrNothing
+            boost::asio::ssl::context &sslContext
         );
 
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
-            const boost::beast::http::request<Body, Fields> &request
+            boost::beast::flat_buffer &buffer,
+            const boost::beast::http::request<Body, Fields> &requestMessage
         );
 
         boost::system::error_code shutdown();
 
     private:
-        boost::asio::ip::tcp::resolver resolver_;
-        Connection connection_;
-        boost::beast::flat_buffer buffer_;
+        std::variant<std::monostate, SecureConnection, Connection> variantConnection_;
     };
 
     //--
 
-    template<typename Connection>
-    template<typename ...SslContextOrNothing>
-    Client<Connection>::Client(
-        boost::asio::io_context &ioContext,
-        const Url &url,
-        SslContextOrNothing &...sslContextOrNothing
-    ) :
-        resolver_(ioContext),
-        connection_(ioContext, resolver_, url, sslContextOrNothing...)
-    {}
-
-    template<typename Connection>
     template<typename Body, typename Fields>
-    boost::beast::http::response<boost::beast::http::dynamic_body> Client<Connection>::request(
+    boost::beast::http::response<boost::beast::http::dynamic_body> VariantConnection::request(
+        boost::beast::flat_buffer &buffer,
         const boost::beast::http::request<Body, Fields> &requestMessage
     ) {
-        return connection_.request(buffer_, requestMessage);
-    }
-
-    template<typename Connection>
-    boost::system::error_code Client<Connection>::shutdown() {
-        return connection_.shutdown();
+        return std::visit(
+            [&buffer, &requestMessage](auto &&connection) -> boost::beast::http::response<boost::beast::http::dynamic_body> {
+                if constexpr (std::is_same_v<std::decay_t<decltype(connection)>, std::monostate> == false) {
+                    return connection.request(buffer, requestMessage);
+                } else {
+                    throw Exception(__FILE__, __LINE__, __func__, "undefined variantConnection_");
+                }
+            },
+            variantConnection_
+        );
     }
 }
 
