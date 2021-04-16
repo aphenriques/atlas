@@ -78,7 +78,7 @@ namespace atlas::server::async {
                 // attention! forwarded onWrite
                 onWriteCopy = std::forward<OnWrite>(onWrite)
             ](boost::system::error_code errorCode, std::size_t bytesTransferred) {
-                onWriteCopy(*thisSharedPointer, messageSharedPointerCopy->need_eof(), errorCode, bytesTransferred);
+                onWriteCopy(*thisSharedPointer, errorCode, bytesTransferred);
             }
         );
     }

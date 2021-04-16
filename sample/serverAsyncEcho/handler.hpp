@@ -72,12 +72,7 @@ namespace handler {
     void onRead(Session &session, boost::system::error_code errorCode, std::size_t bytesTransferred);
 
     template<typename Session>
-    void onWrite(
-        Session &session,
-        bool eofNeeded,
-        boost::system::error_code errorCode,
-        std::size_t bytesTransferred
-    );
+    void onWrite(Session &session, boost::system::error_code errorCode, std::size_t bytesTransferred);
 
     void close(atlas::server::async::Session &session);
     void close(atlas::server::async::SecureSession &secureSession);
@@ -132,14 +127,9 @@ namespace handler {
     }
 
     template<typename Session>
-    void onWrite(Session &session, bool eofNeeded, boost::system::error_code errorCode, std::size_t) {
+    void onWrite(Session &session, boost::system::error_code errorCode, std::size_t) {
         if (errorCode.value() == 0) {
-            if (eofNeeded == false) {
-                session.asyncRead(onRead<Session>);
-                return;
-            } else {
-                close(session);
-            }
+            session.asyncRead(onRead<Session>);
         } else {
             throw exception::RuntimeException(__FILE__, __LINE__, __func__, "write error: [[ ", errorCode.message(), " ]]");
         }
