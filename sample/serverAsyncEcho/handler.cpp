@@ -50,25 +50,25 @@ namespace handler {
                 std::lock_guard<std::mutex> lockGuard(global::outputMutex);
                 std::cout << "ignored handshake error: " << errorCode.message() << std::endl;
             }
-            secureSession.asyncClose(onClose);
+            secureSession.asyncShutdown(onShutdown);
         }
     }
 
-    void close(atlas::server::async::Session &session) {
-        onClose(session.close());
+    void shutdown(atlas::server::async::Session &session) {
+        onShutdown(session.shutdown());
     }
 
-    void close(atlas::server::async::SecureSession &secureSession) {
-        secureSession.asyncClose(onClose);
+    void shutdown(atlas::server::async::SecureSession &secureSession) {
+        secureSession.asyncShutdown(onShutdown);
     }
 
-    void onClose(boost::system::error_code errorCode) {
+    void onShutdown(boost::system::error_code errorCode) {
         if (errorCode.value() == 0) {
             std::lock_guard<std::mutex> lockGuard(global::outputMutex);
-            std::cout << "session closed" << std::endl;
+            std::cout << "session shutdown" << std::endl;
         } else {
             std::lock_guard<std::mutex> lockGuard(global::outputMutex);
-            std::cout << "ignored close error: " << errorCode.message() << std::endl;
+            std::cout << "ignored shutdown error: " << errorCode.message() << std::endl;
         }
     }
 }

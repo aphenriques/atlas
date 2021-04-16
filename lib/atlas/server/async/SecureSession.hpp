@@ -39,8 +39,8 @@ namespace atlas::server::async {
         template<typename OnHandshake>
         void asyncHandshake(OnHandshake &&onHandshake);
 
-        template<typename OnClose>
-        void asyncClose(OnClose &&onClose);
+        template<typename OnShutdown>
+        void asyncShutdown(OnShutdown &&onShutdown);
     };
 
     //--
@@ -59,13 +59,13 @@ namespace atlas::server::async {
         );
     }
 
-    template<typename OnClose>
-    void SecureSession::asyncClose(OnClose &&onClose) {
+    template<typename OnShutdown>
+    void SecureSession::asyncShutdown(OnShutdown &&onShutdown) {
         getStream().async_shutdown(
             [
                 sessionSharedPointer = this->shared_from_this(),
-                // attention! forwarded onClose
-                onCloseCopy = std::forward<OnClose>(onClose)
+                // attention! forwarded onShutdown
+                onCloseCopy = std::forward<OnShutdown>(onShutdown)
             ](boost::system::error_code errorCode) {
                 onCloseCopy(errorCode);
             }

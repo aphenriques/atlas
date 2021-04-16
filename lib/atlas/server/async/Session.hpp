@@ -35,7 +35,7 @@ namespace atlas::server::async {
     public:
         Session(boost::asio::ip::tcp::socket &&socket);
 
-        boost::system::error_code close();
+        boost::system::error_code shutdown();
     };
 }
 

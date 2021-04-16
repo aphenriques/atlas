@@ -32,7 +32,7 @@ namespace atlas::server::async {
         SessionBase<Session, boost::beast::tcp_stream>(boost::beast::tcp_stream(std::move(socket)))
     {}
 
-    boost::system::error_code Session::close() {
+    boost::system::error_code Session::shutdown() {
         boost::system::error_code errorCode;
         getStream().socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, errorCode);
         return errorCode;

@@ -74,9 +74,9 @@ namespace handler {
     template<typename Session>
     void onWrite(Session &session, boost::system::error_code errorCode, std::size_t bytesTransferred);
 
-    void close(atlas::server::async::Session &session);
-    void close(atlas::server::async::SecureSession &secureSession);
-    void onClose(boost::system::error_code errorCode);
+    void shutdown(atlas::server::async::Session &session);
+    void shutdown(atlas::server::async::SecureSession &secureSession);
+    void onShutdown(boost::system::error_code errorCode);
 
     //--
 
@@ -119,7 +119,7 @@ namespace handler {
             // attention! moved response
             session.asyncWrite(std::move(response), onWrite<Session>);
         } else if (errorCode == boost::beast::http::error::end_of_stream) {
-            close(session);
+            shutdown(session);
         } else {
             std::lock_guard<std::mutex> lockGuard(global::outputMutex);
             std::cout << "ignored read error: " << errorCode.message() << std::endl;
