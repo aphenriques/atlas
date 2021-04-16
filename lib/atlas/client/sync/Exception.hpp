@@ -29,7 +29,7 @@
 
 #include <exception/Exception.hpp>
 
-namespace atlas::client {
+namespace atlas::client::sync {
     class Exception : public ::exception::RuntimeException {
     public:
         using ::exception::RuntimeException::RuntimeException;

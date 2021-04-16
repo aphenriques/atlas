@@ -26,6 +26,6 @@
 
 #include "Exception.hpp"
 
-namespace atlas::client {
+namespace atlas::client::sync {
     Exception::~Exception() {}
 }
