@@ -37,9 +37,6 @@ namespace atlas::client::sync {
     template<typename StreamContainer>
     class ConnectionBase {
     public:
-        // throws exception on error
-        void setTcpKeepalive();
-
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
             boost::beast::flat_buffer &buffer,
@@ -48,13 +45,6 @@ namespace atlas::client::sync {
     };
 
     //--
-
-    template<typename StreamContainer>
-    void ConnectionBase<StreamContainer>::setTcpKeepalive() {
-        boost::beast::get_lowest_layer(
-            static_cast<StreamContainer *>(this)->getStream()
-        ).socket().set_option(boost::asio::socket_base::keep_alive(true));
-    }
 
     template<typename StreamContainer>
     template< typename Body, typename Fields>
