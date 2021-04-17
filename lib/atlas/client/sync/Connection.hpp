@@ -31,10 +31,10 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
 #include "../../Url.hpp"
-#include "Requester.hpp"
+#include "ConnectionBase.hpp"
 
 namespace atlas::client::sync {
-    class Connection : public Requester<Connection> {
+    class Connection : public ConnectionBase<Connection> {
     public:
         Connection(
             boost::asio::io_context &ioContext,

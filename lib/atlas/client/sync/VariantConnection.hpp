@@ -41,6 +41,8 @@ namespace atlas::client::sync {
             boost::asio::ssl::context &sslContext
         );
 
+        void setTcpKeepalive();
+
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
             boost::beast::flat_buffer &buffer,

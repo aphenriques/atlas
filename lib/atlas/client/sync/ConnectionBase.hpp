@@ -1,5 +1,5 @@
 //
-//  client/sync/Requester.hpp
+//  client/sync/ConnectionBase.hpp
 //  atlas
 //
 // MIT License
@@ -24,17 +24,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef atlas_client_sync_Requester_hpp
-#define atlas_client_sync_Requester_hpp
+#ifndef atlas_client_sync_ConnectionBase_hpp
+#define atlas_client_sync_ConnectionBase_hpp
 
+#include <boost/asio/socket_base.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/http.hpp>
 #include "Exception.hpp"
 
 namespace atlas::client::sync {
     template<typename StreamContainer>
-    class Requester {
+    class ConnectionBase {
     public:
+        // throws exception on error
+        void setTcpKeepalive();
+
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
             boost::beast::flat_buffer &buffer,
@@ -45,8 +50,15 @@ namespace atlas::client::sync {
     //--
 
     template<typename StreamContainer>
+    void ConnectionBase<StreamContainer>::setTcpKeepalive() {
+        boost::beast::get_lowest_layer(
+            static_cast<StreamContainer *>(this)->getStream()
+        ).socket().set_option(boost::asio::socket_base::keep_alive(true));
+    }
+
+    template<typename StreamContainer>
     template< typename Body, typename Fields>
-    boost::beast::http::response<boost::beast::http::dynamic_body> Requester<StreamContainer>::request(
+    boost::beast::http::response<boost::beast::http::dynamic_body> ConnectionBase<StreamContainer>::request(
         boost::beast::flat_buffer &buffer,
         const boost::beast::http::request<Body, Fields> &requestMessage
     ) {

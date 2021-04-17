@@ -42,6 +42,19 @@ namespace atlas::client::sync {
         }
     }
 
+    void VariantConnection::setTcpKeepalive() {
+        return std::visit(
+            [](auto &&connection) {
+                if constexpr (std::is_same_v<std::decay_t<decltype(connection)>, std::monostate> == false) {
+                    connection.setTcpKeepalive();
+                } else {
+                    throw Exception(__FILE__, __LINE__, __func__, "undefined variantConnection_");
+                }
+            },
+            variantConnection_
+        );
+    }
+
     boost::system::error_code VariantConnection::shutdown() {
         return std::visit(
             [](auto &&connection) -> boost::system::error_code {

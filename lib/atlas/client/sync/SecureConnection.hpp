@@ -31,10 +31,10 @@
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include "../../Url.hpp"
-#include "Requester.hpp"
+#include "ConnectionBase.hpp"
 
 namespace atlas::client::sync {
-    class SecureConnection : public Requester<SecureConnection> {
+    class SecureConnection : public ConnectionBase<SecureConnection> {
     public:
         SecureConnection(
             boost::asio::io_context &ioContext,

@@ -39,6 +39,7 @@ void request(const atlas::Url &url, boost::asio::io_context &ioContext, ExtraCon
         url,
         std::forward<ExtraConnectionArguments>(extraConnectionArguments)...
     );
+    client.setTcpKeepalive();
     boost::beast::http::request<boost::beast::http::string_body> request(boost::beast::http::verb::get, url.getTarget(), 11);
     // HTTP 1.1 requires the Host field
     // https://serverfault.com/a/163655

@@ -46,6 +46,8 @@ namespace atlas::client::sync {
             SslContextOrNothing &...sslContextOrNothing
         );
 
+        void setTcpKeepalive();
+
         template<typename Body, typename Fields>
         boost::beast::http::response<boost::beast::http::dynamic_body> request(
             const boost::beast::http::request<Body, Fields> &request
@@ -71,6 +73,11 @@ namespace atlas::client::sync {
         resolver_(ioContext),
         connection_(ioContext, resolver_, url, sslContextOrNothing...)
     {}
+
+    template<typename Connection>
+    void Client<Connection>::setTcpKeepalive() {
+        connection_.setTcpKeepalive();
+    }
 
     template<typename Connection>
     template<typename Body, typename Fields>
