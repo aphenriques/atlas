@@ -47,7 +47,7 @@ namespace atlas::client::sync {
             const boost::beast::http::request<Body, Fields> &requestMessage
         );
 
-        boost::system::error_code shutdown();
+        void shutdown(boost::system::error_code &errorCode);
 
     private:
         std::variant<std::monostate, SecureConnection, Connection> variantConnection_;

@@ -65,9 +65,7 @@ namespace atlas::client::sync {
         return stream_;
     }
 
-    boost::system::error_code SecureConnection::shutdown() {
-        boost::system::error_code errorCode;
+    void SecureConnection::shutdown(boost::system::error_code &errorCode) {
         stream_.shutdown(errorCode);
-        return errorCode;
     }
 }

@@ -54,9 +54,7 @@ namespace atlas::client::sync {
         return stream_;
     }
 
-    boost::system::error_code Connection::shutdown() {
-        boost::system::error_code errorCode;
+    void Connection::shutdown(boost::system::error_code &errorCode) {
         stream_.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, errorCode);
-        return errorCode;
     }
 }

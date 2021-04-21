@@ -42,11 +42,11 @@ namespace atlas::client::sync {
         }
     }
 
-    boost::system::error_code VariantConnection::shutdown() {
+    void VariantConnection::shutdown(boost::system::error_code &errorCode) {
         return std::visit(
-            [](auto &&connection) -> boost::system::error_code {
+            [&errorCode](auto &&connection) {
                 if constexpr (std::is_same_v<std::decay_t<decltype(connection)>, std::monostate> == false) {
-                    return connection.shutdown();
+                    connection.shutdown(errorCode);
                 } else {
                     throw Exception(__FILE__, __LINE__, __func__, "undefined variantConnection_");
                 }

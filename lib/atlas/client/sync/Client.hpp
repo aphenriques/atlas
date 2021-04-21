@@ -51,7 +51,7 @@ namespace atlas::client::sync {
             const boost::beast::http::request<Body, Fields> &request
         );
 
-        boost::system::error_code shutdown();
+        void shutdown(boost::system::error_code &errorCode);
 
     private:
         boost::asio::ip::tcp::resolver resolver_;
@@ -81,8 +81,8 @@ namespace atlas::client::sync {
     }
 
     template<typename Connection>
-    boost::system::error_code Client<Connection>::shutdown() {
-        return connection_.shutdown();
+    void Client<Connection>::shutdown(boost::system::error_code &errorCode) {
+        connection_.shutdown(errorCode);
     }
 }
 

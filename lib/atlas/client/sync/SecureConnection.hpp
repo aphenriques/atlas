@@ -44,7 +44,7 @@ namespace atlas::client::sync {
         );
 
         boost::beast::ssl_stream<boost::beast::tcp_stream> & getStream();
-        boost::system::error_code shutdown();
+        void shutdown(boost::system::error_code &errorCode);
 
     private:
         boost::beast::ssl_stream<boost::beast::tcp_stream> stream_;

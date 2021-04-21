@@ -55,7 +55,9 @@ namespace handler {
     }
 
     void shutdown(atlas::server::async::Session &session) {
-        onShutdown(session.shutdown());
+        boost::system::error_code errorCode;
+        session.shutdown(errorCode);
+        onShutdown(errorCode);
     }
 
     void shutdown(atlas::server::async::SecureSession &secureSession) {

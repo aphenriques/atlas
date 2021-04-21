@@ -45,7 +45,8 @@ void request(const atlas::Url &url, boost::asio::io_context &ioContext, ExtraCon
     request.set(boost::beast::http::field::host, url.getHost());
     std::cout << "request:\n" << request << "--" << std::endl;
     std::cout << "response:\n" << client.request(request) << "--" << std::endl;
-    boost::system::error_code errorCode = client.shutdown();
+    boost::system::error_code errorCode;
+    client.shutdown(errorCode);
     if (errorCode.value() != 0) {
         std::cout << "ignored shutdown error: " << errorCode.message() << std::endl;
     }

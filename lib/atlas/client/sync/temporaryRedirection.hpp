@@ -142,7 +142,9 @@ namespace atlas::client::sync::temporaryRedirection {
                                 onShutdown,
                                 sslContextOrNothing...
                             );
-                            onShutdown(temporaryClient.shutdown());
+                            boost::system::error_code errorCode;
+                            temporaryClient.shutdown(errorCode);
+                            onShutdown(errorCode);
                             return newResponse;
                         }
                     } else {
