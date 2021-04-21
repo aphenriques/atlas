@@ -41,7 +41,7 @@ void request(boost::asio::io_context &ioContext, const atlas::Url &url, SslConte
     request.set(boost::beast::http::field::host, url.getHost());
     const auto onShutdown = [] (boost::system::error_code errorCode) {
         if (errorCode.value() != 0) {
-            std::cout << "ignored shutdown error: " << errorCode.message() << std::endl;
+            std::cout << "shutdown error: " << errorCode.message() << std::endl;
         }
     };
     std::cout << "request:\n" << request << "--\n"

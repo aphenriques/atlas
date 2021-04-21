@@ -52,6 +52,7 @@ namespace atlas::client::sync {
         );
 
         void shutdown(boost::system::error_code &errorCode);
+        void shutdownAndIgnoreError();
 
     private:
         boost::asio::ip::tcp::resolver resolver_;
@@ -83,6 +84,12 @@ namespace atlas::client::sync {
     template<typename Connection>
     void Client<Connection>::shutdown(boost::system::error_code &errorCode) {
         connection_.shutdown(errorCode);
+    }
+
+    template<typename Connection>
+    void Client<Connection>::shutdownAndIgnoreError() {
+        boost::system::error_code ignoredErrorCode;
+        shutdown(ignoredErrorCode);
     }
 }
 
